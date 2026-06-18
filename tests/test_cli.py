@@ -6,7 +6,6 @@ import sys
 from pathlib import Path
 import pytest
 from quipeg.cli import main
-from quipeg.network import QuantumNetwork
 
 # Compute src directory relative to this test file (works in CI and locally)
 _SRC_DIR = Path(__file__).resolve().parents[1] / "src"

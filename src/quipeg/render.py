@@ -10,6 +10,8 @@ external image assets. It can be opened in any modern browser directly
 from the filesystem.
 """
 
+from typing import List
+
 from quipeg.network import QuantumNetwork
 
 
@@ -47,8 +49,8 @@ def _lon_lat_to_svg(
     """
     if not nodes:
         return {
-            "lon_to_x": lambda l: width / 2,
-            "lat_to_y": lambda l: height / 2,
+            "lon_to_x": lambda lon: width / 2,
+            "lat_to_y": lambda lat: height / 2,
             "lon_range": (0.0, 1.0),
             "lat_range": (0.0, 1.0),
         }
@@ -162,21 +164,11 @@ def to_html(
         stroke = f"hsl({hue:.1f}, 70%, 45%)"
         stroke_opacity = 0.9 if link.active else 0.3
 
-        # Compute SVG line length for tooltip
-        length = ((x2 - x1) ** 2 + (y2 - y1) ** 2) ** 0.5
+        # Compute SVG line midpoint for tooltip
         mx = (x1 + x2) / 2
         my = (y1 + y2) / 2
 
         tooltip_id = f"tooltip_{link.a}_{link.b}".replace(" ", "_").replace("-", "_")
-
-        tooltip_data = (
-            f"Link: {link.a} ↔ {link.b}"
-            f"\\nDistance: {link.distance_km:.1f} km"
-            f"\\nFidelity: {link.fidelity:.4f}"
-            f"\\nQBER: {link.qber:.5f}"
-            f"\\nKey Rate: {link.key_rate/1e6:.3f} Mbit/s"
-            f"\\nStatus: {'Active' if link.active else 'Inactive'}"
-        )
 
         link_elements.append(
             f'<line x1="{x1:.1f}" y1="{y1:.1f}" x2="{x2:.1f}" y2="{y2:.1f}" '
@@ -432,7 +424,4 @@ def save_html(network: QuantumNetwork, path: str, **kwargs) -> None:
         fh.write(content)
 
 
-# ---------------------------------------------------------------------------
-# Required import for type hints
-# ---------------------------------------------------------------------------
-from typing import List
+

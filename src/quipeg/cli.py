@@ -20,9 +20,9 @@ import sys
 from typing import List, Optional
 
 from quipeg import __version__
-from quipeg.network import QuantumNetwork, QuantumNode, QuantumLink, NodeRole, load_csv
-from quipeg.physics import haversine, skr_bb84, secret_key_rate, swap_fidelity_bell
-from quipeg.render import to_html, save_html
+from quipeg.network import QuantumNetwork, load_csv
+from quipeg.physics import haversine, secret_key_rate, swap_fidelity_bell
+from quipeg.render import save_html
 
 
 # ---------------------------------------------------------------------------

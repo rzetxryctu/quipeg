@@ -8,9 +8,7 @@ from quipeg.network import (
     QuantumNode,
     QuantumLink,
     NodeRole,
-    load_csv,
 )
-from quipeg.physics import swap_fidelity_bell
 
 
 # ---------------------------------------------------------------------------
@@ -186,7 +184,7 @@ class TestQuantumNetworkLinks:
     def test_links_returns_in_order(self):
         self.net.add_link("A", "B")
         self.net.add_link("B", "C")
-        assert [l.a for l in self.net.links()] == ["A", "B"]
+        assert [link.a for link in self.net.links()] == ["A", "B"]
 
 
 # ---------------------------------------------------------------------------

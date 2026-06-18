@@ -12,10 +12,9 @@ import csv
 import heapq
 import json
 import math
-import random
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
-from typing import Dict, List, Optional, Tuple, Any, Set
+from typing import Dict, List, Optional, Tuple, Set
 
 from quipeg.physics import (
     haversine,
@@ -24,7 +23,6 @@ from quipeg.physics import (
     decohere_t1_t2,
     swap_fidelity,
     swap_fidelity_bell,
-    qber_from_fidelity,
     secret_key_rate,
 )
 
@@ -899,10 +897,10 @@ class QuantumNetwork:
 
     def summary(self) -> str:
         """One-line human-readable network summary."""
-        active = sum(1 for l in self._links.values() if l.active)
+        active = sum(1 for link in self._links.values() if link.active)
         repeaters = sum(1 for n in self._nodes.values() if n.is_repeater)
         avg_f = (
-            sum(l.fidelity for l in self._links.values())
+            sum(link.fidelity for link in self._links.values())
             / max(1, len(self._links))
         )
         return (

@@ -1,9 +1,7 @@
 """Tests for quipeg.render — HTML topology visualizer."""
 
-import os
-import tempfile
 import pytest
-from quipeg.network import QuantumNetwork, NodeRole
+from quipeg.network import QuantumNetwork
 from quipeg.render import to_html, save_html
 
 
