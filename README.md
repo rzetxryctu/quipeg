@@ -1,279 +1,214 @@
-<div align="center">
+# QuIPEG v3 — Quantum Internet Protocol & Entanglement Gateway
 
-# 🌐 QuIPEG v3 — Quantum Internet Simulator
+A Python toolkit for simulating quantum key distribution (QKD) networks,
+quantum repeaters, entanglement swapping, and BB84 secret-key-rate estimation.
+No third-party dependencies. Python 3.9+.
 
-**Simulate a global quantum internet. No PhD required.**
-
-[![PyPI version](https://img.shields.io/pypi/v/quipeg?color=blue&logo=pypi&logoColor=white)](https://pypi.org/project/quipeg/)
-[![Python](https://img.shields.io/badge/python-3.9%2B-blue?logo=python&logoColor=white)](https://www.python.org/)
-[![License](https://img.shields.io/badge/license-Apache%202.0-green)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-151%20passed-brightgreen?logo=pytest)](https://github.com/rzetxryctu/quipeg/actions)
-[![Lines](https://img.shields.io/badge/lines-4000%2B-orange)](src/quipeg/)
-[![Stars](https://img.shields.io/github/stars/rzetxryctu/quipeg?style=social)](https://github.com/rzetxryctu/quipeg/stargazers)
-
-*Quantum Key Distribution • Entanglement Swapping • Quantum Repeaters • BB84*
-
-[Demo](#-5-second-demo) • [Install](#-install) • [Docs](#-quickstart) • [Contribute](#-contributing)
-
-</div>
+[Install](#install) · [Quickstart](#quickstart) · [Docs](#physics-model) · [Contributing](#contributing)
 
 ---
 
-## What is this? (ELI5)
+## Overview
 
-Imagine an **unhackable internet** powered by quantum physics. Instead of sending classical bits through cables, you share **entangled particles** between cities. Anyone trying to eavesdrop physically destroys the signal — guaranteed by the laws of nature, not by math.
+QuIPEG models a global quantum communication network: nodes (cities, ground
+stations, data centres) connected by optical-fibre links. Entangled photon
+pairs are distributed across those links, and the toolkit tracks how
+fidelity degrades with distance, decoherence, and swapping operations.
 
-**QuIPEG** lets you **design, simulate, and visualize** such a network on your laptop:
+It is useful for teaching quantum networking concepts, prototyping network
+topologies for research papers, and evaluating real-world fibre routes for
+quantum communication deployments.
 
-- 🏙️ **Place nodes** anywhere on Earth (cities, satellites, data centers)
-- 🔗 **Connect them** with realistic fiber optic links
-- 📉 **Watch fidelity decay** as signals travel through fiber
-- 🔄 **Add quantum repeaters** to extend range
-- 🗺️ **Generate interactive maps** with full link metrics
-- 📊 **Export data** for papers, presentations, or decision-making
-
-> **No external dependencies. No quantum computer needed. Just Python 3.9+.**
-
----
-
-## ⚡ 5-Second Demo
-
-```bash
-pip install quipeg
-python -c "
-from quipeg import QuantumNetwork
-net = QuantumNetwork.demo()          # Global 8-city demo network
-r = net.end_to_end('London', 'Tokyo')
-print(f'Fidelity: {r[\"fidelity\"]:.3f} | Key rate: {r[\"key_rate\"]:.1f} bit/s')
-" 
-```
-
-Then generate an **interactive HTML map** of the entire network:
-
-```bash
-quipeg render --output network.html
-quipeg export --format geojson --output network.geojson
-```
-
-Open `network.html` in your browser — hover over any link to see fidelity, QBER, and secret key rate. **Zero external dependencies. Works offline.**
-
----
-
-## 🚀 Why QuIPEG?
-
-| Feature | QuIPEG | Alternatives |
-|---------|--------|--------------|
-| **Dependencies** | ✅ Zero | ❌ NumPy, SciPy, NetworkX... |
-| **Python lines** | ~4,000 | Often 20,000+ |
-| **Installation** | `pip install quipeg` | Complex setup |
-| **Interactive maps** | ✅ Built-in HTML/SVG | ❌ Not included |
-| **Realistic physics** | ✅ T1/T2 decoherence, Bell-corrected swap | ❌ Often simplified |
-| **CLI tools** | ✅ `render`, `export`, `simulate` | ❌ API only |
-| **Tests** | ✅ 151 tests, CI on 4 Python versions | ❌ Varies |
-| **Quantum purification** | ✅ DEJMPS protocol | ❌ Rare |
-| **GeoJSON export** | ✅ | ❌ |
-| **Cost** | Free & open source (Apache 2.0) | Varies |
-
----
-
-## 📦 Install
+## Install
 
 ```bash
 pip install quipeg
 ```
 
-Or from source:
+From source:
 
 ```bash
 git clone https://github.com/rzetxryctu/quipeg.git
 cd quipeg && pip install -e .
 ```
 
-**Requirements:** Python 3.9+ — that's it. No NumPy, no SciPy, no Rust, no CUDA.
+Requires Python 3.9 or later. No other dependencies.
 
----
+## Quickstart
 
-## 🎮 Quickstart
+```python
+from quipeg import QuantumNetwork
 
-### Build a network from scratch
+# Build the built-in 8-city demo network
+net = QuantumNetwork.demo()
+
+# Simulate end-to-end entanglement distribution
+result = net.end_to_end("London", "Tokyo")
+print(f"Fidelity:  {result['fidelity']:.4f}")
+print(f"QBER:      {result['qber']:.5f}")
+print(f"Key rate:  {result['key_rate']:.1f} bit/s")
+```
+
+Generate an interactive map and export data:
+
+```bash
+quipeg render      --output network.html
+quipeg export      --format geojson --output network.geojson
+quipeg simulate    --from London --to Tokyo
+```
+
+Open `network.html` in a browser: hover over links to inspect fidelity,
+QBER, and secret-key rate. The file is fully self-contained (no CDN, no
+external resources).
+
+### Build a custom network
 
 ```python
 from quipeg import QuantumNetwork, NodeRole
 
-net = QuantumNetwork("My Quantum Backbone")
+net = QuantumNetwork("European Backbone")
 
-# Add cities (lat, lon)
 net.add_node("London",    51.5074, -0.1278,  role=NodeRole.BACKBONE)
 net.add_node("Frankfurt", 50.1109,  8.6821,  role=NodeRole.BACKBONE)
-net.add_node("Singapore",  1.3521,  103.8198, role=NodeRole.EDGE)
-net.add_node("Sydney",   -33.8688, 151.2093, role=NodeRole.EDGE)
+net.add_node("Milan",     45.4642,  9.1900)
 
-# Auto-compute fiber distances from GPS coordinates
 net.add_link("London",    "Frankfurt", fidelity=0.97)
-net.add_link("Frankfurt", "Singapore",  fidelity=0.95)
-net.add_link("Singapore", "Sydney",     fidelity=0.96)
+net.add_link("Frankfurt", "Milan",     fidelity=0.96)
 
-# Simulate end-to-end with quantum repeaters
-result = net.end_to_end("London", "Sydney")
-print(f"Fidelity: {result['fidelity']:.4f}")
-print(f"QBER:     {result['qber']:.5f}")
-print(f"Key rate: {result['key_rate']:.1f} bit/s")
-print(f"Path:     {' → '.join(result['path'])}")
+result = net.end_to_end("London", "Milan")
+print(f"Path: {' → '.join(result['path'])}")
+print(f"End-to-end fidelity: {result['fidelity']:.4f}")
 ```
 
-### Use the CLI
-
-```bash
-# Show network info
-quipeg info
-
-# Run demo simulation
-quipeg simulate --from London --to Tokyo
-
-# Generate interactive HTML map
-quipeg render --output network.html --title "Global Quantum Backbone"
-
-# Export to GeoJSON for GIS tools
-quipeg export --format geojson --output network.geojson
-
-# Export to JSON for data analysis
-quipeg export --format json --output network.json
-```
-
-### Use realistic physics
+### Direct physics functions
 
 ```python
 from quipeg.physics import (
-    decohere_t1_t2,       # Realistic qubit memory decoherence
-    swap_fidelity_bell,   # Bell-corrected entanglement swap
-    dejmps_purify,        # DEJMPS entanglement purification
-    secret_key_rate,      # BB84 key rate estimation
-    haversine,            # GPS distance
+    decohere_t1_t2,
+    swap_fidelity_bell,
+    dejmps_purify,
+    secret_key_rate,
+    haversine,
 )
 
-# How much fidelity is left after 100km of fiber?
-import math
-distance_km = 100
-loss_db = 0.2 * distance_km          # 0.2 dB/km standard fiber
-eta = 10 ** (-loss_db / 10)          # Transmittance: ~0.01
-photon_speed_fiber = 2e5              # km/s
-time_s = distance_km / photon_speed_fiber  # ~0.5 ms
+# Fibre decoherence over 100 km
+time_s = 100 / 2e5          # 100 km at 200 000 km/s in fibre
+f = decohere_t1_t2(0.99, time_s, T1=1e-3, T2=1e-3)
+print(f"Fidelity after 100 km: {f:.4f}")
 
-# Simulate decoherence during transit
-f_after = decohere_t1_t2(0.99, time_s, T1=1e-3, T2=1e-3)
-print(f"Fidelity after 100km: {f_after:.4f}")
+# Entanglement swapping
+f_swap = swap_fidelity_bell(0.95, 0.93)
+print(f"Swapped fidelity: {f_swap:.4f}")
+
+# BB84 secret key rate
+skr, info = secret_key_rate(0.97, 50.0)
+print(f"Key rate at 50 km: {skr:.1f} bit/s")
 ```
 
 ---
 
-## 🔬 Physics Model
+## Physics Model
 
-QuIPEG implements **real quantum communication physics**, not toy models:
+### Fibre Loss
 
-| Component | Model | Reference |
-|-----------|-------|-----------|
-| **Fibre loss** | 0.2 dB/km (ITU-T G.652) | Standard telecom |
-| **Decoherence** | T1 (energy) + T2 (phase) independent channels | Open quantum systems |
-| **Entanglement swap** | Bell-corrected: `F₁F₂ + (1-F₁)(1-F₂)/3` | Pan et al., RMP 84, 777 |
-| **Purification** | DEJMPS protocol | Deutsch et al., PRL 77, 2818 |
-| **QBER** | `(1-F)/2` from Werner state | Standard QKD theory |
-| **Key rate** | BB84 decoy-state bound | Ma et al., PRL 94, 050501 |
-
-### Entanglement Swapping
+Standard single-mode fibre at 1550 nm: 0.2 dB/km (ITU-T G.652).
 
 ```
-Before swap:  A ←[F₁]→ R₁ ←[F₂]→ B
-After swap:   A ←[F_swap]→ B
-
-F_swap = F₁ · F₂ + (1-F₁)(1-F₂) / 3
+loss(dB) = 0.2 × distance_km
+η = 10^(-loss_dB / 10)
 ```
 
-This is the **correct quantum formula**, not the arithmetic mean approximation.
+### Decoherence
+
+Two independent channels model realistic quantum-memory noise:
+
+| Channel | Constant | Effect |
+|---------|----------|--------|
+| Energy relaxation (T1) | 1 ms (default) | Decays population toward 0.5 |
+| Phase dephasing (T2) | 1 ms (default) | Decays coherence toward 0.25 |
+
+```
+F(t) = ¼ + ¼·exp(-t/T1) + ½·exp(-t/T2)
+```
+
+### Entanglement Swapping (Bell-Corrected)
+
+When two Bell pairs (F1, F2) are fused via Bell-state measurement:
+
+```
+F_swap = F1 · F2 + (1 - F1)(1 - F2) / 3
+```
+
+This is the standard result from the quantum repeater literature (Pan et al.,
+Rev. Mod. Phys. 84, 777). It reduces to 1.0 for perfect inputs and 0.25 for
+maximally mixed inputs.
+
+### DEJMPS Purification
+
+The Deutsch–Jozsa–Maslennikov–Pedersen protocol takes two imperfect pairs
+and probabilistically produces one pair of higher fidelity:
+
+```
+F_pur = (F1·F2 + (1-F1)(1-F2)/3) / (F1·F2 + (1-F1)(1-F2))
+P_succ = (F1·F2 + (1-F1)(1-F2))²
+```
+
+Purification fails (returns `ok=False`) when either input pair is already
+maximally mixed (F = 0.25), since no entanglement remains to distil.
 
 ### BB84 Secret Key Rate
 
 ```
-SKR = ½ · η · μ · p_swap · [1 - H₂(e) - H₂(e)] · clock_rate
-
-where:
-  η     = fiber transmittance × detector efficiency
-  e     = QBER = (1 - F) / 2
-  H₂(e) = binary entropy
+QBER = (1 - F) / 2
+H₂(x) = -x·log₂(x) - (1-x)·log₂(1-x)
+SKR = ½ · η · μ · p_swap · (1 - 2·QBER - H₂(QBER)) · f_EC · clock_rate
 ```
 
 ---
 
-## 🗺️ Rendering
+## Features
 
-`quipeg render` generates a **self-contained HTML file** with an interactive SVG map:
-
-- 🌍 Nodes placed by real GPS coordinates
-- 🎨 Link colors from green (high fidelity) → red (low)
-- 💬 Hover tooltips show distance, fidelity, QBER, key rate
-- 🔌 Fully offline — no CDN, no external resources
-- 📱 Mouse/keyboard interactive
-
-Ideal for papers, presentations, and demos.
-
----
-
-## 🧪 Tests
-
-151 tests across 4 modules, CI on Python 3.9–3.12:
-
-```bash
-pip install pytest
-pytest tests/ -v
-```
-
-```
-========================= 151 passed in 0.94s =========================
-```
+| Feature | Description |
+|---------|-------------|
+| Zero dependencies | Pure Python 3.9+ |
+| T1/T2 decoherence | Independent energy-relaxation and dephasing channels |
+| Bell-corrected swap | Physically accurate entanglement-swapping formula |
+| DEJMPS purification | Probabilistic entanglement distillation |
+| HTML/SVG renderer | Self-contained interactive map, works offline |
+| GeoJSON export | Import into GIS tools |
+| JSON save/load | Full network serialisation |
+| CLI | `quipeg simulate`, `render`, `export`, `info` |
+| 50+ unit-tested physics functions | Verified edge cases and invariants |
 
 ---
 
-## 🎯 Use Cases
+## Project Structure
 
-- 🎓 **Teaching**: demonstrate quantum networking in lectures
-- 🔬 **Research**: prototype network topologies for papers
-- 📊 **Analysis**: evaluate real-world fiber routes for quantum networks
-- 🛡️ **Security**: estimate eavesdropping detection capability
-- 🏗️ **Planning**: simulate before building real quantum infrastructure
+```
+src/quipeg/           Core package
+  __init__.py         Public API exports
+  physics.py          Physics functions (decoherence, swap, QBER, SKR)
+  network.py          QuantumNetwork, QuantumNode, QuantumLink
+  render.py           HTML/SVG visualisation
+  cli.py              Command-line interface
+tests/                Test suite (~150 tests, CI on Python 3.9–3.12)
+```
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
-Contributions welcome! Whether it's:
-
-- 🐛 Bug reports
-- 💡 Feature requests
-- 🌍 New demo networks for different regions
-- 📝 Documentation improvements
-- 🔬 More physics models
-
-Fork → Commit → Pull Request. Tests must pass.
+Bug reports, feature requests, and pull requests are welcome.
 
 ```bash
 pip install -e ".[dev]"
-pytest tests/ -v        # All tests green?
-ruff check src/ tests/  # Style clean?
+pytest tests/ -v           # run the full suite
+ruff check src/ tests/     # style check
 ```
 
----
+See the [issues](https://github.com/rzetxryctu/quipeg/issues) page for open
+topics.
 
-## 📄 License
+## License
 
-Apache 2.0 — free for commercial and academic use. See [LICENSE](LICENSE).
-
----
-
-<div align="center">
-
-**[⬆ Back to top](#-quipeg-v3--quantum-internet-simulator)**
-
-Made with 🧠 · ⚛️ · 🇮🇹
-
-⭐ Star this repo if you find it useful!
-
-</div>
+Apache License 2.0. See [LICENSE].
