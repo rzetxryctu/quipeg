@@ -420,14 +420,17 @@ def dejmps_purify(f1: float, f2: float) -> Tuple[bool, float, float]:
     if not (0.25 <= f1 <= 1.0) or not (0.25 <= f2 <= 1.0):
         raise ValueError("Purification fidelities must be in [0.25, 1.0]")
 
+    # Both pairs must be non-maximally-mixed for purification to work.
+    # If either pair is already at the mixed-state floor (F=0.25), the
+    # DEJMPS protocol cannot improve fidelity — return failure immediately.
+    if f1 <= 0.25 or f2 <= 0.25:
+        return False, 0.0, 0.0
+
     # Numerator: same as Bell-corrected swap fidelity
     numerator = f1 * f2 + (1 - f1) * (1 - f2) / 3.0
     # Denominator: total probability of correct pair
     denominator = f1 * f2 + (1 - f1) * (1 - f2)
     success_prob = denominator ** 2
-
-    if f1 < 0.25 or f2 < 0.25:
-        return False, 0.0, 0.0
 
     if denominator < 1e-12:
         return False, 0.0, 0.0

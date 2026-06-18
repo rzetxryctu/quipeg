@@ -3,9 +3,13 @@
 import json
 import subprocess
 import sys
+from pathlib import Path
 import pytest
 from quipeg.cli import main
 from quipeg.network import QuantumNetwork
+
+# Compute src directory relative to this test file (works in CI and locally)
+_SRC_DIR = Path(__file__).resolve().parents[1] / "src"
 
 
 class TestCliInfo:
@@ -145,7 +149,7 @@ class TestModuleInvocation:
     def test_python_m_quipeg_cli_info(self):
         result = subprocess.run(
             [sys.executable, "-m", "quipeg.cli", "info"],
-            capture_output=True, text=True, cwd="/home/user/quipeg-v3/src",
+            capture_output=True, text=True, cwd=str(_SRC_DIR),
         )
         assert result.returncode == 0
         assert "Quipeg" in result.stdout
@@ -153,7 +157,7 @@ class TestModuleInvocation:
     def test_python_m_quipeg_cli_demo(self):
         result = subprocess.run(
             [sys.executable, "-m", "quipeg.cli", "demo"],
-            capture_output=True, text=True, cwd="/home/user/quipeg-v3/src",
+            capture_output=True, text=True, cwd=str(_SRC_DIR),
             timeout=30,
         )
         assert result.returncode == 0
