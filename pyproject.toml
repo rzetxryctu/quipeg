@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "quipeg"
 version = "3.0.0"
-description = "Planetary quantum internet simulation toolkit — QKD networks, entanglement swapping, fidelity routing"
+description = "Simulate a global quantum internet — QKD networks, quantum repeaters, entanglement swapping, BB84 key rates. Zero dependencies."
 readme = "README.md"
 license = {text = "Apache-2.0"}
 authors = [
@@ -13,8 +13,12 @@ authors = [
 ]
 keywords = [
     "quantum", "qkd", "quantum-key-distribution", "quantum-internet",
-    "quantum-networking", "entanglement", "repeater", "bell-state",
-    "bb84", "fidelity", "cryptography"
+    "quantum-networking", "quantum-repeater", "entanglement", "bell-state",
+    "bb84", "fidelity", "cryptography", "quantum-cryptography",
+    "entanglement-swapping", "dejmps", "purification", "simulator",
+    "network-simulator", "quantum-physics", "quantum-communication",
+    "quantum-memory", "decoherence", "t1", "t2", "geojson",
+    "visualization", "python", "zero-dependencies"
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
